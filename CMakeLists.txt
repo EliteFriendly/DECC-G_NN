@@ -18,7 +18,11 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 add_executable(Source
     main.cpp
-    
+    Diff_evolution/DiffEvolution.cpp
+    Diff_evolution/IndividualDiffEvolution.cpp 
+    Diff_evolution/DiffMutation.cpp
+    Neural_network/Neuron.cpp
+    Neural_network/NeuronNetwork.cpp
     # Добавьте другие исходные файлы
 )
 

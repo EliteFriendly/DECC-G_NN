@@ -21,11 +21,12 @@ add_executable(Source
     Diff_evolution/DiffEvolution.cpp
     Diff_evolution/IndividualDiffEvolution.cpp 
     Diff_evolution/DiffMutation.cpp
-    Neural_network/Neuron.cpp
-    Neural_network/NeuronNetwork.cpp
+    DECC_G/Decc_g.cpp
+    #Neural_network/Neuron.cpp
+    #Neural_network/NeuronNetwork.cpp
     # Добавьте другие исходные файлы
 )
 
 # Копируем данные в папку сборки (опционально)
-#file(COPY test/ DESTINATION ${CMAKE_BINARY_DIR}/test)
+#file(COPY  DESTINATION ${CMAKE_BINARY_DIR})
 #file(COPY algorithm_results/ DESTINATION ${CMAKE_BINARY_DIR}/algorithm_results)

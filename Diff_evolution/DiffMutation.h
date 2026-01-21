@@ -1,11 +1,9 @@
-#pragma once
 #include "IndividualDiffEvolution.h"
 #include<vector>
 #include <iostream>
-#include "../general/general_var.h"
 
 using namespace std;
-
+#pragma once
 class DiffMutation
 {
 private:

@@ -1,17 +1,21 @@
 #pragma once
+//#include
+#include "../general/general_var.h"
 #include<iostream>
 #include<vector>
 #include <functional>
-#include "../general/general_var.h"
+
+
 using namespace std;
 
 class IndividualDiffEvolution
+	#pragma once
 {
 private:
 	double* coordinats = nullptr;//Координаты индивида
 	double* limitsDimension = nullptr;//Ограничение на каждую ось
 	double acc;//Точность поиска точки
-	double fitness;//Значение пригодности
+	double fitness = -9999999;;//Значение пригодности
 	function<double(double*)> func;
 	string aim;
 	int ammDimen;
@@ -19,7 +23,7 @@ private:
 
 public:
 	IndividualDiffEvolution(const IndividualDiffEvolution&);
-	IndividualDiffEvolution() { fitness = -99999999; }
+	IndividualDiffEvolution() {}
 	IndividualDiffEvolution(double* limitsDimension, function<double(double*)> func, int ammDimen, double acc, string aim);
 	void replaceCoordinats(double* repCoord) {
 		if (coordinats == nullptr) {

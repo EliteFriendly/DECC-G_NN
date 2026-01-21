@@ -9,12 +9,6 @@ using namespace std;
 //General 
 static mt19937 gen(9005656); // random generator
 
-//for Tree
-static const int amBinaryFunc = 2; // Количество бинарных функций
-static const int amUnaryFunc = 1; // Количество унарных функций
-static const vector<string> strBinaryFunc = { "+", ">" }; // Символьный вывод функции
-static const vector<string> strUnaryFunc = {"recc"}; // Символьный вывод функции unary
-static const int amFuncActive = 15; // Количество функций активации
 
 static double fixExp(double x)
 { // fix exponent
@@ -87,5 +81,5 @@ static function<double(double)> funcActivation[16] = {
 
 
 //for DE
-static const int numInd = 30;
-static const int numGen = 30;
+static const int numInd = 50;
+static const int numGen = 50;

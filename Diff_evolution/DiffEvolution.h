@@ -1,20 +1,18 @@
-#pragma once
-#include "../general/computing_limitation.h"
-#include "DiffMutation.h"
-#include "IndividualDiffEvolution.h"
 #include <algorithm>
 #include <cmath>
 #include <ctime>
 #include <functional>
 #include <iostream>
-#include "../general/general_var.h"
+#include "DiffMutation.h"
+#include "IndividualDiffEvolution.h"
+#include "../general/computing_limitation.h"
 
 using namespace std;
-
+#pragma once
 class DiffEvolution
 {
   private:
-    function<double(double *)> overFittingFunc;
+    function<double(double *)> overFittingFunc = nullptr; // Функция для проверки переобучения
     function<double(double *)> func;
     string aim;      // Цель задачи
     double F;        // Масштабирующий фактор
@@ -65,19 +63,12 @@ class DiffEvolution
     {
         overFittingFunc = func;
     }
-    double *getBestCoordinates()
+
+    IndividualDiffEvolution getBestIndividual()
     {
-        return best.getCoordinats();
+        return best;
     }
 
-    double getBestFuncValue()
-    {
-        return func(best.getCoordinats());
-    }
-    double getBestFitness()
-    {
-        return best.getFitness();
-    }
     void setRejectionRate(double rejectionRate)
     {
         this->rejectionRate = rejectionRate;

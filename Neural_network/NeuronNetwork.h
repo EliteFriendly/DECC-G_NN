@@ -3,7 +3,8 @@
 #include <vector>
 #include <functional>
 #include "Neuron.h"
-#include "../Diff_evolution/DiffEvolution.h"
+#include "../DECC_G/DECC_G.h"
+#include "../general/general_var.h"
 #include <fstream>
 #include <ctime>
 using namespace std;
@@ -15,28 +16,50 @@ private:
 	int neuronCount;//Количество нейронов в каждом слое, столбцы
 	int inCount;//Количество входящих параметров
 
-	vector<double> outCoef;//Выходные коэффициенты для получения ОДНОГО y
-	vector<vector<Neuron>> grid;//Сетка из нейронов
+	double* outCoef = nullptr;//Выходные коэффициенты для получения ОДНОГО y
+	Neuron** grid = nullptr;//Сетка из нейронов
 	//Обычное умножение матрицы строки на матрицу столбец, для получения вектора суммы в нейронах, а после использование функции активации нейрона
-	vector<double> matrixMulti(vector<Neuron>, vector<double>);
-	double funcActivation(double);
-	double getError(vector<double> w, vector<double> x, vector<double> y);
+	double* matrixMulti(Neuron*, double*, int);
+	double getError(double* w, double* x, double* y, int dataSize);
 	
 	
 	double errorCombination = 9999999;//Ошибка для сохранения комбинации
-	vector<double> bestCombination;//Наилучшие значения для весовых коэффициентов
-	vector<double> bestFuncCombo;//Наилучшие значения для функций активации
+	double* bestCombination = nullptr;//Наилучшие значения для весовых коэффициентов
+
 	void setFuncActivation(vector<double>);
-	void changeW(vector<double> w);
-	double startTrainDE(vector<double> x, vector<double> y);
+	
+	
+	
+	void ADAMTrain(double** x , double* y , int dataSize , int numEpochs , double beta1 , double beta2 , double learningRate);
 
 public:
 	void changeFromFile(string nameFile);
-	double getError(vector<double> x, vector<double> y);
-	NeuronNetwork(int layerCount, int neuronCount,int inCount);
+	double getError(double** x, double* y, int dataSize);
+	NeuronNetwork(int layerCount, int neuronCount,int inCount, int numUsedFuncActivation = 0);
 	void saveSettings(string fileName);
-	void startTrainGA(vector<double> x, vector<double> y);
-	double getValue(vector<double>);
+	double getValue(double*);
+	void changeW(double* w);
 	
+	void startTrain(double** x , double* y , int dataSize , int numEpochs = 1000 , double beta1 = 0.9 , double beta2 = 0.999 , double learningRate = 0.01, int fevGlobal = 1000, int T = 10);
+
+
+	~NeuronNetwork()
+	{
+		if (outCoef != nullptr) {
+			delete[] outCoef;
+			outCoef = nullptr;
+		}
+		if (grid != nullptr) {
+			for (int i = 0; i < layerCount; i++) {
+				delete[] grid[i];
+			}
+			delete[] grid;
+			grid = nullptr;
+		}
+		if (bestCombination != nullptr) {
+			delete[] bestCombination;
+			bestCombination = nullptr;
+		}
+	}
 };
 

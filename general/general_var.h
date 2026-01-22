@@ -7,7 +7,7 @@ using namespace std;
 
 #pragma once
 //General 
-static mt19937 gen(9005656); // random generator
+static mt19937 gen(90056656); // random generator
 
 
 static double fixExp(double x)
@@ -81,5 +81,5 @@ static function<double(double)> funcActivation[16] = {
 
 
 //for DE
-static const int numInd = 50;
-static const int numGen = 50;
+static const int numInd = 30;
+static const int numGen = 30;

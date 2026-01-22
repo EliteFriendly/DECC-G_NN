@@ -14,7 +14,45 @@ double* Decc_g::createLocalSolution(int numComponent , double* x)
     return localSolution;
 }
 
-void Decc_g::startTrain(int fevGlobal , int T , ComputingLimitation& cl)
+void Decc_g::recreateWorstComponents()
+{
+    //create array of fitness and indexes
+        vector<pair<double, int>> fitnessComponents;
+        for (int i = 0; i < numComponents; i++)
+        {
+            fitnessComponents.push_back({ bestIndividualComponent[i].getFitness() , i });
+        }
+        //sort by fitness
+        sort(fitnessComponents.begin() , fitnessComponents.end() , [](const pair<double , int>& a , const pair<double , int>& b) { return a.first < b.first; });
+
+        //Choose worst components to recreate
+        int amToRecreate = (numComponents / 2);
+        int* arrOldSubComponents = new int[amToRecreate * numSubcomponents];
+
+        //store old subcomponents
+        for (int i = 0; i < amToRecreate; i++)
+        {
+            for (int j = 0; j < numSubcomponents; j++)
+            {
+                arrOldSubComponents[i * numSubcomponents + j] = matrixSubcomponents[fitnessComponents[i].second][j];
+            }
+        }
+        //create random numbers for new subcomponents
+        vector<int> arrIndexDimension(amToRecreate * numSubcomponents);
+        iota(arrIndexDimension.begin(), arrIndexDimension.end(), 0);
+        shuffle(arrIndexDimension.begin() , arrIndexDimension.end() , gen);
+
+        //recreate worst components
+        for (int i = 0; i < amToRecreate; i++)
+        {
+            for (int j = 0; j < numSubcomponents; j++)
+            {
+                matrixSubcomponents[fitnessComponents[i].second][j] = arrOldSubComponents[arrIndexDimension[i * numSubcomponents + j]];
+            }
+        }
+}
+
+void Decc_g::startTrain(int fevGlobal , int T , ComputingLimitation& cl, string aim)
 {
     //create random numbers for subcomponents
     vector<int> arrIndexDimension(numDimenisons);
@@ -60,7 +98,7 @@ void Decc_g::startTrain(int fevGlobal , int T , ComputingLimitation& cl)
                 //create fitness function
                 function<double(double*)> fitnessFunc = [&](double* x) {
                     double* localSolution = createLocalSolution(i , x);
-                    double result = func(localSolution);
+                    double result = (aim == "max") ? func(localSolution) : 1 / (1 + func(localSolution)); //max or min
                     delete[] localSolution;
                     return result;
                     };
@@ -76,17 +114,36 @@ void Decc_g::startTrain(int fevGlobal , int T , ComputingLimitation& cl)
             }
         }
         //recreate worst components/2
-        recreateWorstComponents();
+        
         //update final solution
+
+
+        globalFitness = (aim == "max") ? func(globalSolution) : 1 / (1 + func(globalSolution)); //max or min
+        double *localSolution = new double[numDimenisons];
         for (int i = 0; i < numComponents; i++)
         {
+            for (int j = 0; j < numDimenisons; j++)
+            {
+                localSolution[j] = globalSolution[j];
+            }
             double* compCoord = bestIndividualComponent[i].getCoordinats();
             for (int j = 0; j < numSubcomponents; j++)
             {
-                globalSolution[matrixSubcomponents[i][j]] = compCoord[j];
+                localSolution[matrixSubcomponents[i][j]] = compCoord[j];
             }
+            double localFitness = (aim == "max") ? func(localSolution) : 1 / (1 + func(localSolution));
+            if (globalFitness < localFitness)
+            {
+                globalFitness = localFitness;
+                for (int j = 0; j < numDimenisons; j++)
+                {
+                    globalSolution[j] = localSolution[j];
+                }
+            }
+
         }
-        
+        recreateWorstComponents();
+
 
     }
 

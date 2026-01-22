@@ -2,11 +2,11 @@
 
 
 
-Neuron::Neuron(function<double(double)> funcActivation, int ammountNeuronLayer):funcActivation(funcActivation)
+Neuron::Neuron(function<double(double)> funcActivation, int ammountNeuronLayer):funcActivation(funcActivation), sizeW(ammountNeuronLayer + 1)
 {
-	w.resize(ammountNeuronLayer + 1);//Создание массива для входящих нейронов +смещение
-	for (int i = 0; i < w.size(); i++) {
-		w[i] = rand() % 1000 * 0.01;
+	w = new double[sizeW];
+	for (int i = 0; i < sizeW; i++) {
+		w[i] = gen() % 1000 * 0.01;
 	}
 }
 
@@ -15,14 +15,15 @@ Neuron::Neuron(const Neuron& copy):w(copy.w),funcActivation(copy.funcActivation)
 
 
 
-void Neuron::changeW(vector<double> wChange)
+void Neuron::changeW(double* wChange, int& counter)
 {
-	for (int i = 0; i < w.size(); i++) {
-		w[i] = wChange[i];
+	for (int i = 0; i < sizeW; i++) {
+		w[i] = wChange[counter];
+		counter++;
 	}
 }
 
-vector<double> Neuron::getW()
+double* Neuron::getW()
 {
 	return w;
 }

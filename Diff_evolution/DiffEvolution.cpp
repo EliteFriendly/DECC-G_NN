@@ -52,7 +52,8 @@ void DiffEvolution::saveBest()
 
 bool DiffEvolution::networkQualityCheck(int generation)
 {
-    if (generation < round(generations * rejectionRate)+1)
+    
+    if (generation < round(generations * rejectionRate) + 1)
         return true;
     for (int i = generation; i > generation - round(generations * rejectionRate); i--)
     {
@@ -65,6 +66,8 @@ bool DiffEvolution::networkQualityCheck(int generation)
 
 bool DiffEvolution::overFittingCheck(int generation)
 {
+    if (overFittingFunc == nullptr)
+        return false;
     trackValidationFitness[generation] = overFittingFunc(best.getCoordinats());
     //cout << maxPartPatience << endl;
     if (generation < round(generations * maxPartPatience)+1) {
@@ -149,8 +152,8 @@ void DiffEvolution::startSearch(double acc, double F, double Cr, int N, int gene
         }
         saveBest();
         trackBest[i] = best.getFitness();
-        if (cl.getComputingLimitation() == 0 or !networkQualityCheck(i) or
-            overFittingCheck(i)) // If amount of computing is over or best dont change then stop
+        if (cl.getComputingLimitation() == 0) /*or !networkQualityCheck(i) or
+            overFittingCheck(i)) // If amount of computing is over or best dont change then stop*/
         {
             return;
         }

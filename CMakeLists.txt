@@ -5,7 +5,7 @@ project(DECC-G_NN)
 set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_BUILD_TYPE Debug)  # Включает отладочную информацию
 #set(CMAKE_BUILD_TYPE Debug)
-add_compile_options(-O0 -g3)  # Отключаем оптимизации
+#add_compile_options(-O3 -g3)  # Отключаем оптимизации
 
 
 # Add include directory
@@ -22,11 +22,11 @@ add_executable(Source
     Diff_evolution/IndividualDiffEvolution.cpp 
     Diff_evolution/DiffMutation.cpp
     DECC_G/Decc_g.cpp
-    #Neural_network/Neuron.cpp
-    #Neural_network/NeuronNetwork.cpp
+    Neural_network/Neuron.cpp
+    Neural_network/NeuronNetwork.cpp
     # Добавьте другие исходные файлы
 )
 
 # Копируем данные в папку сборки (опционально)
-#file(COPY  DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY results/ DESTINATION ${CMAKE_BINARY_DIR}/results)
 #file(COPY algorithm_results/ DESTINATION ${CMAKE_BINARY_DIR}/algorithm_results)

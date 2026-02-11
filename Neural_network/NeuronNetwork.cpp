@@ -70,7 +70,7 @@ void NeuronNetwork::startTrain(double** x , double* y , int dataSize , int numEp
 	//find optimal ampount components
 	int optimaullAmountComponents = 2;
 	for (int numComponents = amountW; numComponents >= 2; numComponents--) {
-		if (amountW % numComponents == 0 and ((amountW / numComponents) > 3 or amountW <= 21)) {
+		if (amountW % numComponents == 0 && ((amountW / numComponents) > 3 || amountW <= 21)) {
 			optimaullAmountComponents = numComponents;
 			break;
 		}
@@ -195,27 +195,36 @@ void NeuronNetwork::ADAMTrain(double** x , double* y , int dataSize , int numEpo
 			delete[] wMinus;
 		}
 	}
+	delete[]v_t;
+	delete[]s_t;
+	delete[]w;
 }
 
 double NeuronNetwork:: getValue(double* in)
 {
-	double* tmpResultsHL = new double[neuronCount]; //Временный массив для хранения результатов 
+	//double* tmpResultsHL = new double[neuronCount]; //Временный массив для хранения результатов 
 	//Первый слой
 	double* layerValues = matrixMulti(grid[0], in, inCount);
-	tmpResultsHL = layerValues;
+	//tmpResultsHL = layerValues;
 
 	//Цикл прогонки по нейронам
 	for (int i = 1; i < layerCount; i++) {
 
-		tmpResultsHL = matrixMulti(grid[i] , tmpResultsHL, neuronCount);
+		//tmpResultsHL = matrixMulti(grid[i] , tmpResultsHL, neuronCount);
+		double* tmp = layerValues;
+		layerValues = matrixMulti(grid[i], layerValues, neuronCount);
+		delete[] tmp;
 	}
 
 	//Цикл получения выходящего значения
 	double sum = 0;//Здесь будет хранится значение у
 	for (int i = 0; i < neuronCount; i++) {
-		sum += outCoef[i] * tmpResultsHL[i];
+		//sum += outCoef[i] * tmpResultsHL[i];
+		sum += outCoef[i] * layerValues[i];
 	}
 	sum += outCoef[neuronCount];//Добавление смещения
+	//delete[] tmpResultsHL;
+	delete[] layerValues;
 	return sum;
 }
 

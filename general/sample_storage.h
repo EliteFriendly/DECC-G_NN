@@ -1,9 +1,10 @@
+#pragma once
 #include <cmath>
 #include <iostream>
 #include "../general/general_var.h"
 using namespace std;
 
-#pragma once
+//#pragma once
 class SampleStorage
 {
   private:
@@ -122,7 +123,7 @@ class SampleStorage
         for (int i = 0; i < size; i++)
         {
             tmp += remainder;
-            if (tmp < 1 and i1 < trainSize)
+            if (tmp < 1 && i1 < trainSize)
             {
                 for (int j = 0; j < amDimensions; j++)
                 {
@@ -155,8 +156,7 @@ class SampleStorage
     }
 
   public:
-    SampleStorage(int size, int amDimensions, double **data, double trainPart, string target)
-    {
+    SampleStorage(int size, int amDimensions, double **data, double trainPart, string target){
         this->size = size;
         this->amDimensions = amDimensions + 1;
         trainSize = trainPart * size;

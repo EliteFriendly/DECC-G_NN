@@ -5,6 +5,7 @@
 #include <functional>
 #include <vector>
 #include <algorithm>
+#include <numeric>
 #include "../Diff_evolution/IndividualDiffEvolution.h"
 #include "../Diff_evolution/DiffEvolution.h"
 

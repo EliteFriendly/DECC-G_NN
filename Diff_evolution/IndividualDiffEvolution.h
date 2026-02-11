@@ -1,4 +1,4 @@
-#pragma once
+
 //#include
 #include "../general/general_var.h"
 #include<iostream>

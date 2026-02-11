@@ -4,7 +4,9 @@
 #include <iostream>
 #include <functional>
 using namespace std;
-
+#ifdef _DEBUG
+#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
 #pragma once
 //General 
 static mt19937 gen(90056656); // random generator

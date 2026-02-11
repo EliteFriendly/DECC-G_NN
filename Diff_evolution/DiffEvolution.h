@@ -8,7 +8,6 @@
 #include "../general/computing_limitation.h"
 
 using namespace std;
-#pragma once
 class DiffEvolution
 {
   private:

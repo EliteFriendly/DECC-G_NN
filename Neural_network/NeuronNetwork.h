@@ -1,4 +1,3 @@
-#pragma once
 #include <iostream>
 #include <vector>
 #include <functional>
@@ -40,7 +39,7 @@ public:
 	double getValue(double*);
 	void changeW(double* w);
 	
-	void startTrain(double** x , double* y , int dataSize , int numEpochs = 1000 , double beta1 = 0.9 , double beta2 = 0.999 , double learningRate = 0.01, int fevGlobal = 1000, int T = 10);
+	void startTrain(double** x , double* y , int dataSize , int numEpochs, double beta1, double beta2, double learningRate, int fevGlobal, int T);
 
 
 	~NeuronNetwork()

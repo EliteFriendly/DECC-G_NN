@@ -29,7 +29,7 @@ IndividualDiffEvolution DiffMutation::getDonor(IndividualDiffEvolution *arrIndiv
     {
         number = gen() % ammInd;
         int j = 0;
-        while ((j != ammount or j <= i) and !(ammInd < ammount))
+        while ((j != ammount || j <= i) && !(ammInd < ammount))
         {
             if (selectedInd[j] == number)
             {

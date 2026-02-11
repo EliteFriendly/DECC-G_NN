@@ -3,8 +3,18 @@
 #include "Neural_network/NeuronNetwork.h"
 #include "general/general_var.h"
 #include <fstream>
-#include <thread>
+#include <string>
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#include <ctime>
 
+
+
+
+#ifdef _DEBUG
+#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
+_CrtMemState state1, state2, diff;
 int dimension = 1;
 
 double researchFunction(double* x)
@@ -54,6 +64,7 @@ void doResearch(int fevGlobal, int T, int layerCount, int neuronCount, int runNu
             i2++;
         }
     }
+    
 
     ofstream file_test("results/results_test_fevG" + to_string(fevGlobal) + "_T" + to_string(T) + "_lCount" + to_string(layerCount) + "_nCount" + to_string(neuronCount) + "_run" + to_string(runNumber) + ".txt");
 
@@ -65,7 +76,8 @@ void doResearch(int fevGlobal, int T, int layerCount, int neuronCount, int runNu
         throw "Error with creating file";
     }
     NeuronNetwork nn(layerCount , neuronCount , dimension , 12);
-    nn.startTrain(trainX , trainY , dataSize * 0.75 , 500 , 0.9 , 0.999 , 0.15 , fevGlobal , T);
+
+    nn.startTrain(trainX , trainY , int(dataSize * 0.75) , 500 , 0.9 , 0.999 , 0.15 , fevGlobal , T);
     for (int i = 0; i < dataSize * 0.25; i++)
     {
         double pred = nn.getValue(testX[i]);
@@ -85,7 +97,11 @@ void doResearch(int fevGlobal, int T, int layerCount, int neuronCount, int runNu
     {
         delete[] x[i];
     }
-
+    
+    delete[] testY;
+    delete[] trainY;
+    delete[] testX;
+    delete[] trainX;
     delete[] x;
     delete[] y;
 
@@ -96,26 +112,40 @@ void doResearch(int fevGlobal, int T, int layerCount, int neuronCount, int runNu
 
 int main()
 {
+    // Включаем автоматический дамп утечек при выходе
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+    clock_t start = clock();
     setlocale(0 , "");
-    int fevGlobal[3] = { 10, 8, 5 };
-    int T[3] = { 4, 5, 8 };
+    int fevGlobal[3] = { 4, 8, 5 };
+    int T[3] = { 2, 5, 8 };
     int layerCount[3] = { 2, 3, 4 };
     int neuronCount[3] = { 4, 3, 2 };
     int ft , ln = 0;
-    
-    for (ft = 0; ft < 1; ft++) {
-        for (ln = 0; ln < 3; ln++) {
-            cout << "Starting research for fevGlobal = " << fevGlobal[ft] << ", T = " << T[ft] << ", layerCount = " << layerCount[ln] << ", neuronCount = " << neuronCount[ln] << endl;
-            vector<thread> threads;
-            for (int runNumber = 1; runNumber <= 7; runNumber++)
-                threads.push_back(thread(doResearch, fevGlobal[ft], T[ft], layerCount[ln], neuronCount[ln], runNumber));
-            if (threads.size() >= 7) {
+    try {
+        for (ft = 0; ft < 1; ft++) {
+            for (ln = 0; ln < 1; ln++) {
+                cout << "Starting research for fevGlobal = " << fevGlobal[ft] << ", T = " << T[ft] << ", layerCount = " << layerCount[ln] << ", neuronCount = " << neuronCount[ln] << endl;
+                //vector<thread> threads;
+                for (int runNumber = 0; runNumber <= 20; runNumber++)
+                    doResearch(fevGlobal[ft] , T[ft] , layerCount[ln] , neuronCount[ln] , 1);
+                //threads.push_back(thread(doResearch , fevGlobal[ft] , T[ft] , layerCount[ln] , neuronCount[ln] , runNumber));
+            /*if (threads.size() >= 7) {
                 for (auto& th : threads) {
                     th.join();
                 }
-            }
-        }
-            
-    }
+            }*/
 
+            }
+
+        }
+    }
+    catch (const char* msg) {
+        cerr << "Error: " << msg << endl;
+    }
+    //_CrtDumpMemoryLeaks();
+    clock_t end = clock();
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+    std::cout << "Elapsed time: " << elapsed << " seconds." << std::endl;
+    return 0;
 }

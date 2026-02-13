@@ -29,4 +29,5 @@ add_executable(Source
 
 # Копируем данные в папку сборки (опционально)
 file(COPY results/ DESTINATION ${CMAKE_BINARY_DIR}/results)
+file(COPY test_task/ DESTINATION ${CMAKE_BINARY_DIR}/test_task)
 #file(COPY algorithm_results/ DESTINATION ${CMAKE_BINARY_DIR}/algorithm_results)

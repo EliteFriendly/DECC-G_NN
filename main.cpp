@@ -14,9 +14,9 @@
 #ifdef _DEBUG
 #define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
 #endif
-_CrtMemState state1, state2, diff;
-int dimension = 1;
 
+int dimension = 1;
+static const int DATA_SIZE = 1000;
 double researchFunction(double* x)
 {
     //Example: Sphere function
@@ -24,7 +24,7 @@ double researchFunction(double* x)
     return y;
 }
 
-void doResearch(int fevGlobal, int T, int layerCount, int neuronCount, int runNumber)
+void doResearch(string path, int dim, int fevGlobal, int T, int layerCount, int neuronCount, int runNumber)
 {
     double leftBound = -2 , rightBound = 5;
     double h = 0.05;
@@ -105,7 +105,124 @@ void doResearch(int fevGlobal, int T, int layerCount, int neuronCount, int runNu
     delete[] x;
     delete[] y;
 
+    ifstream file(path);
+    if (!file.is_open())
+    {
+        cerr << "Error opening files" << endl;
+        exit(1);
+    }
+    // Read data from file
+    double **data = new double *[DATA_SIZE];
+    for (int i = 0; i < DATA_SIZE; i++)
+    {
 
+        data[i] = new double[dim+1];
+
+        for (int j = 0; j < dim+1; j++)
+        {
+            file >> data[i][j];
+            //cout<<data[i][j]<<" ";
+            if (file.peek() == ',')
+                file.ignore();
+            // cout << data[i][j] << " ";
+        }
+        //cout << endl;
+
+        // cout << endl;
+    }
+    file.close();
+    SampleStorage storage(DATA_SIZE, dim, data, 0.75, "reg"); // 75% for training
+
+    int treeDepth = 4; // depth of tree
+
+    ofstream fileOut("algorithm_results/Results/Best_" + to_string(runNumber) + ".txt");
+    if (!fileOut.is_open())
+    {
+        cout << "Error opening file out" << endl;
+        exit(1);
+    }
+    ofstream filePoints("algorithm_results/Points/" + to_string(runNumber) + ".txt");
+    if (!filePoints.is_open())
+    {
+        cout << "Error opening file out" << endl;
+        exit(1);
+    }
+
+    cout << "Iteration " << to_string(runNumber) << endl;
+    //AdaptiveGeneticProgramming proba(treeDepth, "reg");
+    //proba.numFileAndTrail(mark,true);
+    //proba.startTrain(data, dim, 1, DATA_SIZE,30,30);
+    //Tree best = proba.getBest();
+    // fileOut << proba.getError(dataTest, size * 0.25) << endl;
+    //fileOut << best.getFunc() << endl;
+    //fileOut << best.getMatrix() << endl;
+    //fileOut.close();
+    for (int i = 0;i < storage.getTestSize();i++) {
+        ///filePoints << storage.getTestData()[i][dim] << " " << best.getValue(storage.getTestData()[i])[0] << endl;
+    }
+    filePoints.close();
+
+
+}
+
+void test(string path, int dim, string mark)
+{
+    ifstream file(path);
+    if (!file.is_open())
+    {
+        cerr << "Error opening files" << endl;
+        exit(1);
+    }
+    // Read data from file
+    double **data = new double *[DATA_SIZE];
+    for (int i = 0; i < DATA_SIZE; i++)
+    {
+
+        data[i] = new double[dim+1];
+
+        for (int j = 0; j < dim+1; j++)
+        {
+            file >> data[i][j];
+            //cout<<data[i][j]<<" ";
+            if (file.peek() == ',')
+                file.ignore();
+            // cout << data[i][j] << " ";
+        }
+        //cout << endl;
+
+        // cout << endl;
+    }
+    file.close();
+    SampleStorage storage(DATA_SIZE, dim, data, 0.75, "reg"); // 75% for training
+
+    int treeDepth = 4; // depth of tree
+
+    ofstream fileOut("algorithm_results/Results/Best_" + mark + ".txt");
+    if (!fileOut.is_open())
+    {
+        cout << "Error opening file out" << endl;
+        exit(1);
+    }
+    ofstream filePoints("algorithm_results/Points/" + mark + ".txt");
+    if (!filePoints.is_open())
+    {
+        cout << "Error opening file out" << endl;
+        exit(1);
+    }
+
+    cout << "Iteration " << mark << endl;
+    //AdaptiveGeneticProgramming proba(treeDepth, "reg");
+    //proba.numFileAndTrail(mark,true);
+    //proba.startTrain(data, dim, 1, DATA_SIZE,30,30);
+    //Tree best = proba.getBest();
+    // fileOut << proba.getError(dataTest, size * 0.25) << endl;
+    //fileOut << best.getFunc() << endl;
+    //fileOut << best.getMatrix() << endl;
+    //fileOut.close();
+    for (int i = 0;i < storage.getTestSize();i++) {
+        //filePoints << storage.getTestData()[i][dim] << " " << best.getValue(storage.getTestData()[i])[0] << endl;
+    }
+    filePoints.close();
 }
 
 
@@ -114,6 +231,65 @@ int main()
 {
     // Включаем автоматический дамп утечек при выходе
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+
+setlocale(0,"");
+    clock_t tStart = clock();
+
+    std::vector<std::string> file_names = {
+        "I_6_2b.txt",
+        "I_8_14.txt", 
+        "I_12_1.txt",
+        "I_12_2.txt",
+        "I_12_4.txt",
+        "I_14_3.txt",
+        "I_14_4.txt",
+        "I_15_3x.txt",
+        "I_15_10.txt",
+        "I_18_4.txt",
+        "I_24_6.txt",
+        "I_34_8.txt"
+    };
+
+// Массив количества изменяемых параметров для каждой задачи
+    std::vector<int> parameter_counts = {
+        3,  // I.6.2b: 
+        4,  // I.8.14: x1, y1, x2, y2
+        2,  // I.12.1: q1, q2, r
+        4,  // I.12.2: q, E, v, B
+        3,  // I.12.4: mu, r
+        3,  // I.14.3: m, h
+        2,  // I.14.4: k, x
+        4,  // I.15.3x: x1, u, t
+        3,  // I.15.10: m, v
+        4,  // I.18.4: m, v, r, theta
+        4,  // I.24.6: n, theta2
+        4   // I.34.8: q, a
+    };
+    string st = "test/" + file_names[0];
+    //cout << st << endl;
+    ifstream file(st);
+    if (!file.is_open())
+    {
+        cerr << "Error opening files" << endl;
+        exit(1);
+    }
+    
+
+
+    try {
+    for (int i = 0;i < file_names.size();i++) {
+        for (int r = 0; r < 10; r++)
+        {
+            test("test/"+file_names[i], parameter_counts[i],to_string(i)+to_string(r));
+        }
+    }
+    }
+    catch(exception& e)
+    {
+        cout << e.what() << endl;
+    }
+
 
     clock_t start = clock();
     setlocale(0 , "");
@@ -128,14 +304,14 @@ int main()
                 cout << "Starting research for fevGlobal = " << fevGlobal[ft] << ", T = " << T[ft] << ", layerCount = " << layerCount[ln] << ", neuronCount = " << neuronCount[ln] << endl;
                 //vector<thread> threads;
                 for (int runNumber = 0; runNumber <= 20; runNumber++)
-                    doResearch(fevGlobal[ft] , T[ft] , layerCount[ln] , neuronCount[ln] , 1);
+                    //doResearch(fevGlobal[ft] , T[ft] , layerCount[ln] , neuronCount[ln] , 1);
                 //threads.push_back(thread(doResearch , fevGlobal[ft] , T[ft] , layerCount[ln] , neuronCount[ln] , runNumber));
             /*if (threads.size() >= 7) {
                 for (auto& th : threads) {
                     th.join();
                 }
             }*/
-
+                    cout << "jfkgj";
             }
 
         }

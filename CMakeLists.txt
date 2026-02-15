@@ -5,8 +5,8 @@ project(DECC-G_NN)
 set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_BUILD_TYPE Debug)  # Включает отладочную информацию
 #set(CMAKE_BUILD_TYPE Debug)
-#add_compile_options(-O3 -g3)  # Отключаем оптимизации
-
+add_compile_options(-O3)  # Включаем оптимизации
+#add_compile_options(-O0 -g3) # Для максимальной отладочной информации
 
 # Add include directory
 include_directories(include)

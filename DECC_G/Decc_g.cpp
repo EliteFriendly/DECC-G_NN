@@ -65,7 +65,9 @@ void Decc_g::startTrain(int fevGlobal , int T , ComputingLimitation& cl, string 
     {
         globalSolution[i] = limitsDimension[2 * i] + (limitsDimension[2 * i + 1] - limitsDimension[2 * i]) * (gen() % 1000) / 1000.0;
     }
-
+    if (numGen == 0) {
+        return; //no need to train
+    }
 
     //create subcomponents
     matrixSubcomponents = new int* [numComponents];

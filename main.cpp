@@ -7,6 +7,7 @@
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #include <ctime>
+#include <thread>
 
 
 
@@ -24,216 +25,136 @@ double researchFunction(double* x)
     return y;
 }
 
-void doResearch(string path, int dim, int fevGlobal, int T, int layerCount, int neuronCount, int runNumber)
+void doResearch(string path, int dim, int fevGlobal, int T, int layerCount, int neuronCount,string task, string run)
 {
-    double leftBound = -2 , rightBound = 5;
-    double h = 0.05;
-    int dataSize = (rightBound - leftBound) / h;
-    double** x = new double* [dataSize];
-    double* y = new double[dataSize];
-
-    double** testX = new double* [int(dataSize*0.25)];
-    double** trainX = new double* [int(dataSize * 0.75)];
-    double* testY = new double[int(dataSize * 0.25)];
-    double* trainY = new double[int(dataSize * 0.75)];
-
-
-
-    int i1 = 0 , i2 = 0;
-    
-    for (int i = 0; i < dataSize; i++)
+    ifstream file(path);
+    if (!file.is_open())
     {
-        x[i] = new double[dimension];
-        x[i][0] = leftBound + i * h;
-        
-        double res = researchFunction(x[i]);
-        double g = (rand() % 21-10)/100.0;
-        y[i] = res + res * g; //adding noise
-        if (i%4 == 0)
-        {
-            testX[i1] = new double[dimension];
-            testX[i1] = x[i];
-            testY[i1] = y[i];
-            i1++;
-        }
-        else
-        {
-            trainX[i2] = new double[dimension];
-            trainX[i2] = x[i];
-            trainY[i2] = y[i];
-            i2++;
-        }
+        cerr << "Error opening files" << endl;
+        exit(1);
     }
+    // Read data from file
+    double **data = new double *[DATA_SIZE];
+    for (int i = 0; i < DATA_SIZE; i++)
+    {
+
+        data[i] = new double[dim+1];
+
+        for (int j = 0; j < dim+1; j++)
+        {
+            file >> data[i][j];
+            //cout<<data[i][j]<<" ";
+            if (file.peek() == ',')
+                file.ignore();
+            // cout << data[i][j] << " ";
+        }
+        //cout << endl;
+
+        // cout << endl;
+    }
+    file.close();
+    SampleStorage storage(DATA_SIZE, dim, data, 0.75, "reg"); // 75% for training
+
+    int treeDepth = 4; // depth of tree
+
+
+
+
+
+    double** trainX = new double*[storage.getTrainSize()];
+    double** testX = new double* [storage.getTestSize()];
+    double* trainY = new double[storage.getTrainSize()];
+    double* testY = new double[storage.getTestSize()];
+    for (int i = 0; i < storage.getTrainSize(); i++)
+    {
+        trainX[i] = new double[dim];
+        for (int j = 0; j < dim; j++)
+        {
+            trainX[i][j] = storage.getTrainData()[i][j];
+        }
+        trainY[i] = storage.getTrainData()[i][dim];
+    }
+    for (int i = 0; i < storage.getTestSize(); i++)
+    {
+        testX[i] = new double[dim];
+        for (int j = 0; j < dim; j++)
+        {
+            testX[i][j] = storage.getTestData()[i][j];
+        }
+        testY[i] = storage.getTestData()[i][dim];
+    }
+
     
 
-    ofstream file_test("results/results_test_fevG" + to_string(fevGlobal) + "_T" + to_string(T) + "_lCount" + to_string(layerCount) + "_nCount" + to_string(neuronCount) + "_run" + to_string(runNumber) + ".txt");
+    ofstream file_test("results/" + task + "_test_fevG" + to_string(fevGlobal) + "_T" + to_string(T) + "_lCount" + to_string(layerCount) + "_nCount" + to_string(neuronCount) + "_run" + run + ".txt");
 
-    ofstream file_train("results/results_train_fevG" + to_string(fevGlobal) + "_T" + to_string(T) + "_lCount" + to_string(layerCount) + "_nCount" + to_string(neuronCount) + "_run" + to_string(runNumber) + ".txt");
+    ofstream file_train("results/" + task + "_train_fevG" + to_string(fevGlobal) + "_T" + to_string(T) + "_lCount" + to_string(layerCount) + "_nCount" + to_string(neuronCount) + "_run" + run + ".txt");
 
 
     if (!file_test.is_open())
     {
         throw "Error with creating file";
     }
-    NeuronNetwork nn(layerCount , neuronCount , dimension , 12);
+    NeuronNetwork nn(layerCount , neuronCount , dim, 12);
 
-    nn.startTrain(trainX , trainY , int(dataSize * 0.75) , 500 , 0.9 , 0.999 , 0.15 , fevGlobal , T);
-    for (int i = 0; i < dataSize * 0.25; i++)
+    nn.startTrain(trainX , trainY , storage.getTrainSize()  , 21600 , 0.9 , 0.999 , 0.15 , fevGlobal , T);
+
+    for (int i = 0; i < dim+2; i++)
     {
-        double pred = nn.getValue(testX[i]);
-        file_test << testX[i][0] << "\t" << testY[i] << "\t" << pred << "\n";
+            if(i == dim){
+                file_test << "Y_true" << "\t";
+                file_train << "Y_true" << "\t";
+            }
+        else if (i == dim + 1){
+            file_test << "Y_pred" << "\t";
+            file_train << "Y_pred" << "\t";
+        }
+        else {
+                file_test << "X" << i << "\t";
+                file_train << "X" << i << "\t";
+            }
+    }
+    file_test << "\n";
+    file_train << "\n";
+
+    for (int i = 0; i < storage.getTestSize(); i++)
+    {
+        
+        double pred_test = nn.getValue(testX[i]);
+        double pred_train = nn.getValue(trainX[i]);
+        for (int j = 0;j < dim;j++) {
+            file_test << testX[i][j] << "\t";
+            file_train << trainX[i][j] << "\t";
+        }
+        file_test << testY[i] << "\t" << pred_test << "\n";
+        file_train << trainY[i] << "\t" << pred_train << "\n";
     }
     file_test.close();
-
-    for (int i = 0; i < dataSize * 0.75; i++)
-    {
-        double pred = nn.getValue(trainX[i]);
-        file_train << trainX[i][0] << "\t" << trainY[i] << "\t" << pred << "\n";
-    }
     file_train.close();
-
-    //clear memory
-    for (int i = 0; i < dataSize; i++)
-    {
-        delete[] x[i];
+    //clering memory
+    for (int i = 0;i < dim;i++) {
+        delete[] trainX[i];
+        delete[] testX[i];
     }
-    
-    delete[] testY;
-    delete[] trainY;
-    delete[] testX;
     delete[] trainX;
-    delete[] x;
-    delete[] y;
-
-    ifstream file(path);
-    if (!file.is_open())
-    {
-        cerr << "Error opening files" << endl;
-        exit(1);
-    }
-    // Read data from file
-    double **data = new double *[DATA_SIZE];
-    for (int i = 0; i < DATA_SIZE; i++)
-    {
-
-        data[i] = new double[dim+1];
-
-        for (int j = 0; j < dim+1; j++)
-        {
-            file >> data[i][j];
-            //cout<<data[i][j]<<" ";
-            if (file.peek() == ',')
-                file.ignore();
-            // cout << data[i][j] << " ";
-        }
-        //cout << endl;
-
-        // cout << endl;
-    }
-    file.close();
-    SampleStorage storage(DATA_SIZE, dim, data, 0.75, "reg"); // 75% for training
-
-    int treeDepth = 4; // depth of tree
-
-    ofstream fileOut("algorithm_results/Results/Best_" + to_string(runNumber) + ".txt");
-    if (!fileOut.is_open())
-    {
-        cout << "Error opening file out" << endl;
-        exit(1);
-    }
-    ofstream filePoints("algorithm_results/Points/" + to_string(runNumber) + ".txt");
-    if (!filePoints.is_open())
-    {
-        cout << "Error opening file out" << endl;
-        exit(1);
-    }
-
-    cout << "Iteration " << to_string(runNumber) << endl;
-    //AdaptiveGeneticProgramming proba(treeDepth, "reg");
-    //proba.numFileAndTrail(mark,true);
-    //proba.startTrain(data, dim, 1, DATA_SIZE,30,30);
-    //Tree best = proba.getBest();
-    // fileOut << proba.getError(dataTest, size * 0.25) << endl;
-    //fileOut << best.getFunc() << endl;
-    //fileOut << best.getMatrix() << endl;
-    //fileOut.close();
-    for (int i = 0;i < storage.getTestSize();i++) {
-        ///filePoints << storage.getTestData()[i][dim] << " " << best.getValue(storage.getTestData()[i])[0] << endl;
-    }
-    filePoints.close();
+    delete[] testX;
+    delete[] trainY;
+    delete[] testY;
 
 
 }
 
-void test(string path, int dim, string mark)
-{
-    ifstream file(path);
-    if (!file.is_open())
-    {
-        cerr << "Error opening files" << endl;
-        exit(1);
-    }
-    // Read data from file
-    double **data = new double *[DATA_SIZE];
-    for (int i = 0; i < DATA_SIZE; i++)
-    {
 
-        data[i] = new double[dim+1];
-
-        for (int j = 0; j < dim+1; j++)
-        {
-            file >> data[i][j];
-            //cout<<data[i][j]<<" ";
-            if (file.peek() == ',')
-                file.ignore();
-            // cout << data[i][j] << " ";
-        }
-        //cout << endl;
-
-        // cout << endl;
-    }
-    file.close();
-    SampleStorage storage(DATA_SIZE, dim, data, 0.75, "reg"); // 75% for training
-
-    int treeDepth = 4; // depth of tree
-
-    ofstream fileOut("algorithm_results/Results/Best_" + mark + ".txt");
-    if (!fileOut.is_open())
-    {
-        cout << "Error opening file out" << endl;
-        exit(1);
-    }
-    ofstream filePoints("algorithm_results/Points/" + mark + ".txt");
-    if (!filePoints.is_open())
-    {
-        cout << "Error opening file out" << endl;
-        exit(1);
-    }
-
-    cout << "Iteration " << mark << endl;
-    //AdaptiveGeneticProgramming proba(treeDepth, "reg");
-    //proba.numFileAndTrail(mark,true);
-    //proba.startTrain(data, dim, 1, DATA_SIZE,30,30);
-    //Tree best = proba.getBest();
-    // fileOut << proba.getError(dataTest, size * 0.25) << endl;
-    //fileOut << best.getFunc() << endl;
-    //fileOut << best.getMatrix() << endl;
-    //fileOut.close();
-    for (int i = 0;i < storage.getTestSize();i++) {
-        //filePoints << storage.getTestData()[i][dim] << " " << best.getValue(storage.getTestData()[i])[0] << endl;
-    }
-    filePoints.close();
-}
 
 
 
 int main()
 {
     // Включаем автоматический дамп утечек при выходе
-    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+    //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
 
-setlocale(0,"");
+    setlocale(0,"");
     clock_t tStart = clock();
 
     std::vector<std::string> file_names = {
@@ -266,55 +187,73 @@ setlocale(0,"");
         4,  // I.24.6: n, theta2
         4   // I.34.8: q, a
     };
-    string st = "test/" + file_names[0];
-    //cout << st << endl;
-    ifstream file(st);
-    if (!file.is_open())
-    {
-        cerr << "Error opening files" << endl;
-        exit(1);
-    }
+
     
-
-
-    try {
-    for (int i = 0;i < file_names.size();i++) {
-        for (int r = 0; r < 10; r++)
-        {
-            test("test/"+file_names[i], parameter_counts[i],to_string(i)+to_string(r));
-        }
-    }
-    }
-    catch(exception& e)
-    {
-        cout << e.what() << endl;
-    }
-
-
     clock_t start = clock();
     setlocale(0 , "");
-    int fevGlobal[3] = { 4, 8, 5 };
+    int fevGlobal[3] = { 6, 8, 5 };
     int T[3] = { 2, 5, 8 };
-    int layerCount[3] = { 2, 3, 4 };
-    int neuronCount[3] = { 4, 3, 2 };
-    int ft , ln = 0;
+    int layerCount[3] = { 2, 3, 4 };// for 2, 3 and 4 parameters
+    int neuronCount[3] = { 4, 3, 2 };// for 2, 3 and 4 parameters
+    // amm parametrs for 2, 3 and 4 parameters are next: 27, 40, 45
+    int ln = 0;
+    //cout<< "test_task/"+file_names[0]<<endl;
     try {
-        for (ft = 0; ft < 1; ft++) {
-            for (ln = 0; ln < 1; ln++) {
-                cout << "Starting research for fevGlobal = " << fevGlobal[ft] << ", T = " << T[ft] << ", layerCount = " << layerCount[ln] << ", neuronCount = " << neuronCount[ln] << endl;
+        for (int i = 0;i < parameter_counts.size();i++) {
+            vector<thread> threads;
+            for (int runNumber = 1; runNumber <= 8; runNumber++) {
+                cout << "Running task: " << file_names[i] << ", run: " << runNumber << endl;
+                switch (parameter_counts[i]) {
+                    case 2:
+                        ln = 0;
+                        break;
+                    case 3:
+                        ln = 1;
+                        break;
+                    case 4:
+                        ln = 2;
+                        break;
+                    default:
+                        throw "Unsupported number of parameters";
+                }
+                
+                if (threads.size() <= 8) {
+                    threads.push_back(thread(doResearch , "test_task/" + file_names[i] , parameter_counts[i] ,
+                    fevGlobal[0] , T[0] , layerCount[ln] , neuronCount[ln] ,
+                        file_names[i].substr(0 , file_names[i].find('.')) , to_string(runNumber)));
+                    
+                }
+                else {
+                    for (int i = 0; i < 8; i++) {
+                        threads[i].join();
+                    }
+                    threads.clear();
+                }
+
+                /*doResearch("test_task/" + file_names[i] , parameter_counts[i] , fevGlobal[ft] ,
+                    T[ft] , layerCount[ln] , neuronCount[ln] ,
+                        file_names[i].substr(0 , file_names[i].find('.')) , to_string(runNumber));*/
+            }
+            if (threads.size() > 0) {
+                for (int i = 0; i < threads.size(); i++) {
+                    threads[i].join();
+                }
+            }
+        }
+
+                
                 //vector<thread> threads;
-                for (int runNumber = 0; runNumber <= 20; runNumber++)
-                    //doResearch(fevGlobal[ft] , T[ft] , layerCount[ln] , neuronCount[ln] , 1);
+                
                 //threads.push_back(thread(doResearch , fevGlobal[ft] , T[ft] , layerCount[ln] , neuronCount[ln] , runNumber));
             /*if (threads.size() >= 7) {
                 for (auto& th : threads) {
                     th.join();
                 }
             }*/
-                    cout << "jfkgj";
-            }
 
-        }
+            
+
+        
     }
     catch (const char* msg) {
         cerr << "Error: " << msg << endl;

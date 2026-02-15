@@ -1,0 +1,25 @@
+Running task: I_6_2b.txt, run: 0
+Error after training: 0.050284
+Running task: I_8_14.txt, run: 0
+Error after training: 0.889071
+Running task: I_12_1.txt, run: 0
+Error after training: 3.43513
+Running task: I_12_2.txt, run: 0
+Error after training: 0.0651682
+Running task: I_12_4.txt, run: 0
+Error after training: 0.0527261
+Running task: I_14_3.txt, run: 0
+Error after training: 11.5189
+Running task: I_14_4.txt, run: 0
+Error after training: 5.65615
+Running task: I_15_3x.txt, run: 0
+Error after training: 0.485726
+Running task: I_15_10.txt, run: 0
+Error after training: 0.900792
+Running task: I_18_4.txt, run: 0
+Error after training: 0.69819
+Running task: I_24_6.txt, run: 0
+Error after training: 6.39445
+Running task: I_34_8.txt, run: 0
+Error after training: 5.08127
+Elapsed time: 161.123 seconds.

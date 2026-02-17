@@ -25,7 +25,7 @@ double researchFunction(double* x)
     return y;
 }
 
-void doResearch(string path, int dim, int fevGlobal, int T, int layerCount, int neuronCount,string task, string run)
+void doResearch(string path, int dim, int fevGlobal, int T, int layerCount, int neuronCount,string task, string run, int amWeight, int amComponents)
 {
     ifstream file(path);
     if (!file.is_open())
@@ -54,11 +54,6 @@ void doResearch(string path, int dim, int fevGlobal, int T, int layerCount, int 
     }
     file.close();
     SampleStorage storage(DATA_SIZE, dim, data, 0.75, "reg"); // 75% for training
-
-    int treeDepth = 4; // depth of tree
-
-
-
 
 
     double** trainX = new double*[storage.getTrainSize()];
@@ -96,8 +91,11 @@ void doResearch(string path, int dim, int fevGlobal, int T, int layerCount, int 
         throw "Error with creating file";
     }
     NeuronNetwork nn(layerCount , neuronCount , dim, 12);
-
-    nn.startTrain(trainX , trainY , storage.getTrainSize()  , 21600 , 0.9 , 0.999 , 0.15 , fevGlobal , T);
+    int ADAMcalc = 10800;
+    if (numGen == 0) {
+        ADAMcalc += round((ADAMcalc*amComponents) / double(amWeight));
+    }
+    nn.startTrain(trainX , trainY , storage.getTrainSize() , ADAMcalc , 0.9 , 0.999 , 0.15 , fevGlobal , T);
 
     for (int i = 0; i < dim+2; i++)
     {
@@ -195,6 +193,8 @@ int main()
     int T[3] = { 2, 5, 8 };
     int layerCount[3] = { 2, 3, 4 };// for 2, 3 and 4 parameters
     int neuronCount[3] = { 4, 3, 2 };// for 2, 3 and 4 parameters
+    int amWeights[3] = { 27,40,45 };
+    int ammComponents[3] = { 3,10,9 };
     // amm parametrs for 2, 3 and 4 parameters are next: 27, 40, 45
     int ln = 0;
     //cout<< "test_task/"+file_names[0]<<endl;
@@ -220,7 +220,7 @@ int main()
                 if (threads.size() <= 8) {
                     threads.push_back(thread(doResearch , "test_task/" + file_names[i] , parameter_counts[i] ,
                     fevGlobal[0] , T[0] , layerCount[ln] , neuronCount[ln] ,
-                        file_names[i].substr(0 , file_names[i].find('.')) , to_string(runNumber)));
+                        file_names[i].substr(0 , file_names[i].find('.')) , to_string(runNumber),amWeights[ln],ammComponents[ln]));
                     
                 }
                 else {

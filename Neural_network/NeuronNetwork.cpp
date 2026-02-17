@@ -58,7 +58,6 @@ void NeuronNetwork::changeW(double* w)
 void NeuronNetwork::startTrain(double** x , double* y , int dataSize , int numEpochs , double beta1 , double beta2 , double learningRate,int fevGlobal, int T)
 {
 	int amountW = (neuronCount * (inCount + 1) + (layerCount - 1) * (neuronCount + 1) * neuronCount + (neuronCount + 1));
-	cout<< "Amount weights: " << amountW << endl;
 	double* limitsDimension = new double[amountW * 2];
 	for (int i = 0; i < amountW * 2; i++) {
 		if (i % 2 == 0) {
@@ -76,7 +75,7 @@ void NeuronNetwork::startTrain(double** x , double* y , int dataSize , int numEp
 			break;
 		}
 	}
-	
+	cout << "Ammount components:\t" << optimaullAmountComponents << endl;
 	Decc_g decc_g(optimaullAmountComponents , amountW , [&](double* w) { changeW(w); return getError(x , y , dataSize); } , limitsDimension);
 	ComputingLimitation cl;
 	cl.setComputingLimitation(T*fevGlobal*numGen*numInd);

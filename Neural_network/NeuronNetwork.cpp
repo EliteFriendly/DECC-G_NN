@@ -75,7 +75,7 @@ void NeuronNetwork::startTrain(double** x , double* y , int dataSize , int numEp
 			break;
 		}
 	}
-	cout << "Ammount components:\t" << optimaullAmountComponents << endl;
+	//cout << "Ammount components:\t" << optimaullAmountComponents << endl;
 	Decc_g decc_g(optimaullAmountComponents , amountW , [&](double* w) { changeW(w); return getError(x , y , dataSize); } , limitsDimension);
 	ComputingLimitation cl;
 	cl.setComputingLimitation(T*fevGlobal*numGen*numInd);

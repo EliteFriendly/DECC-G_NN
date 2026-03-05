@@ -370,3 +370,6 @@ FodyWeavers.xsd
 
 #all results
 **algorithm_results/**/*.txt
+
+/results_*/*.txt
+/results_DECC
